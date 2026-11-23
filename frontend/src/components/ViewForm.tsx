@@ -84,7 +84,7 @@ export default function ViewForm() {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               placeholder="Enter your username"
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 mb-4 "
+              className="w-full rounded-xl border text-black border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 mb-4 "
             />
           </div>
 

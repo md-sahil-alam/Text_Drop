@@ -1,27 +1,42 @@
-const express= require("express");
+const express = require("express");
 const cors = require("cors");
-const { default: mongoose } = require("mongoose");
-const {textRouter} = require("./textRouter");
-const env = require("dotenv").config();
-const MONGO_URL = process.env.MONGO_URL;
+const mongoose = require("mongoose");
+const { textRouter } = require("./textRouter");
+require("dotenv").config();
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: [
+    "https://textdrop.in",
+    "https://www.textdrop.in"
+  ]
+}));
+
 app.use(express.json());
 
-app.use("/api/v1",textRouter);
+app.use("/api/v1", textRouter);
 
-
-async function main(){
-  const PORT = 8000
-  try {
-    console.log("conecting mongo")
-    await mongoose.connect(MONGO_URL)
-    app.listen(PORT,()=>{
-    console.log("server is listing on "+ PORT)
-  })
-  } catch (error) {
-    console.log(error)
+// MongoDB connection
+async function connectDB() {
+  if (mongoose.connection.readyState === 1) {
+    return;
   }
+
+  await mongoose.connect(process.env.MONGO_URL);
+  console.log("MongoDB connected");
 }
-main();
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    res.status(500).json({
+      message: "Database connection failed"
+    });
+  }
+});
+
+module.exports = app;

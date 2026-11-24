@@ -15,16 +15,26 @@ app.use(cors({
 
 app.use(express.json());
 
-app.use("/api/v1", textRouter);
-
 // MongoDB connection
+let connectionPromise;
+
 async function connectDB() {
   if (mongoose.connection.readyState === 1) {
     return;
   }
 
-  await mongoose.connect(process.env.MONGO_URL);
-  console.log("MongoDB connected");
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(process.env.MONGO_URL)
+      .then(() => {
+        console.log("MongoDB connected");
+      })
+      .catch((error) => {
+        connectionPromise = null;
+        throw error;
+      });
+  }
+
+  await connectionPromise;
 }
 
 app.use(async (req, res, next) => {
@@ -38,5 +48,9 @@ app.use(async (req, res, next) => {
     });
   }
 });
+
+app.use("/api/v1", textRouter);
+
+
 
 module.exports = app;
